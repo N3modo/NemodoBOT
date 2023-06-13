@@ -15,7 +15,6 @@ bot.add_command(command_vrac.clear)
 bot.add_command(yt_player.play_music)
 bot.add_command(yt_player.pause_music)
 bot.add_command(yt_player.resume_music)
-bot.add_command(yt_player.join_channel)
 bot.add_command(yt_player.leave_channel)
 bot.add_command(yt_player.stop_music)
 
