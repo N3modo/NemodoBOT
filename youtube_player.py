@@ -39,6 +39,9 @@ def reschedule_play(exception, voice_client):
 
 def schedule_play(voice_client):
     global current_queue, currently_playing
+    if currently_playing >= len(current_queue):
+        return
+
     audio_url = extract_audio_url(current_queue[currently_playing])
     audio_source = discord.FFmpegPCMAudio(audio_url,
                                           before_options=" -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 1")
@@ -79,6 +82,20 @@ async def play_music(ctx, *, url):
         print("Started playing music")
 
 
+@bot.command(name='queue')
+async def show_queue(ctx):
+    global current_queue, currently_playing
+    if not current_queue:
+        await ctx.send("La file d'attente est vide.")
+    else:
+        queue_list = []
+        for i, video in enumerate(current_queue, start=currently_playing + 1):
+            queue_list.append(f"{i}. {video.title}")
+        queue_message = "\n".join(queue_list)
+        await ctx.send(f"File d'attente des chansons:\n{queue_message}")
+
+
+
 @bot.command(name='pause')
 async def pause_music(ctx):
     voice_client = ctx.voice_client
@@ -95,12 +112,38 @@ async def resume_music(ctx):
         print("Music resumed")
 
 
-@bot.command(name='stop')
-async def stop_music(ctx):
+@bot.command(name='skip')
+async def skip_music(ctx):
+    global currently_playing, current_queue
     voice_client = ctx.voice_client
     if voice_client is not None and voice_client.is_playing():
         voice_client.stop()
-        print("Music stopped")
+        if currently_playing < len(current_queue):
+            currently_playing += 1
+            if not voice_client.is_playing():
+                schedule_play(voice_client)
+            await ctx.send("Musique actuelle passée. Lecture de la musique suivante si disponible.")
+        else:
+            current_queue.clear()
+            currently_playing = 0
+            await ctx.send("Plus de musique à passer.")
+    else:
+        await ctx.send("Aucune musique n'est actuellement en cours de lecture.")
+
+
+
+@bot.command(name='stop')
+async def stop_music(ctx):
+    global currently_playing, current_queue
+    voice_client = ctx.voice_client
+    if voice_client is not None:
+        if voice_client.is_playing() or voice_client.is_paused():
+            voice_client.stop()
+            current_queue.clear()
+            currently_playing = 0
+            await ctx.send("La lecture de musique a été arrêtée et la file d'attente a été effacée.")
+        await voice_client.disconnect()
+        await ctx.send("Le bot a quitté le canal vocal.")
 
 
 @bot.command(name='leave')
