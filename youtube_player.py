@@ -1,7 +1,5 @@
 import discord
-import asyncio
 import pytube
-import os
 
 from discord.ext import commands
 
@@ -42,7 +40,8 @@ def reschedule_play(exception, voice_client):
 def schedule_play(voice_client):
     global current_queue, currently_playing
     audio_url = extract_audio_url(current_queue[currently_playing])
-    audio_source = discord.FFmpegPCMAudio(audio_url, before_options=" -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 1")
+    audio_source = discord.FFmpegPCMAudio(audio_url,
+                                          before_options=" -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 1")
     voice_client.play(audio_source, after=lambda e: reschedule_play(e, voice_client))
 
 
@@ -50,60 +49,63 @@ def schedule_play(voice_client):
 async def on_ready():
     print(f'{bot.user.name} is connected to Discord!')
 
-@bot.command(name='join')
-async def join_channel(ctx):
-    if not ctx.author.voice:
-        await ctx.send("You are not connected to a voice channel!")
-        return
-    voice_channel = ctx.author.voice.channel
-    voice_client = ctx.voice_client
-    if voice_client is not None:
-        await voice_client.move_to(voice_channel)
-    else:
-        await voice_channel.connect()
-
-@bot.command(name='leave')
-async def leave_channel(ctx):
-    voice_client = ctx.voice_client
-    if voice_client is not None:
-        await voice_client.disconnect()
 
 @bot.command(name='play')
 async def play_music(ctx, *, url):
     global current_queue, currently_playing
     voice_client = ctx.voice_client
+
+    if not ctx.author.voice:
+        await ctx.send("You are not connected to a voice channel!")
+        return
+
+    voice_channel = ctx.author.voice.channel
+
     if voice_client is None:
-        await ctx.invoke(bot.get_command('join'))
+        await voice_channel.connect()
         voice_client = ctx.voice_client
+        print(f"Bot joined voice channel: {voice_channel.name}")
+    elif voice_client.channel != voice_channel:
+        await voice_client.move_to(voice_channel)
+        print(f"Bot moved to voice channel: {voice_channel.name}")
 
     last_queue_len = len(current_queue)
     current_queue += get_audio(url)
+    print(f"Added {len(current_queue) - last_queue_len} video(s) to the queue")
 
     if not voice_client.is_playing():
         currently_playing = last_queue_len
         schedule_play(voice_client)
+        print("Started playing music")
+
 
 @bot.command(name='pause')
 async def pause_music(ctx):
     voice_client = ctx.voice_client
     if voice_client is not None and voice_client.is_playing():
         voice_client.pause()
+        print("Music paused")
+
 
 @bot.command(name='resume')
 async def resume_music(ctx):
     voice_client = ctx.voice_client
     if voice_client is not None and voice_client.is_paused():
         voice_client.resume()
+        print("Music resumed")
+
 
 @bot.command(name='stop')
 async def stop_music(ctx):
     voice_client = ctx.voice_client
     if voice_client is not None and voice_client.is_playing():
         voice_client.stop()
+        print("Music stopped")
 
-# Function to remove the temporary audio file
-def remove_audio_file(audio_file):
-    try:
-        os.remove(audio_file)
-    except OSError as e:
-        print(f"Error removing audio file: {e}")
+
+@bot.command(name='leave')
+async def leave_channel(ctx):
+    voice_client = ctx.voice_client
+    if voice_client is not None:
+        await voice_client.disconnect()
+        print("Bot left the voice channel")
