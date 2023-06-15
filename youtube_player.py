@@ -88,9 +88,9 @@ async def show_queue(ctx):
     if not current_queue:
         await ctx.send("La file d'attente est vide.")
     else:
-        queue_list = []
-        for i, video in enumerate(current_queue, start=currently_playing + 1):
-            queue_list.append(f"{i}. {video.title}")
+        queue_list = [f"Currently playing: {current_queue[currently_playing].title}"]
+        for i, video in enumerate(current_queue[currently_playing+1:]):
+            queue_list.append(f"{i+1}: {video.title}")
         queue_message = "\n".join(queue_list)
         await ctx.send(f"File d'attente des chansons:\n{queue_message}")
 
