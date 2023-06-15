@@ -1,10 +1,6 @@
 import discord
 import pytube
 
-from discord.ext import commands
-
-intents = discord.Intents().all()
-bot = commands.Bot(command_prefix='!', intents=intents)
 current_queue = []
 currently_playing = 0
 
@@ -48,12 +44,10 @@ def schedule_play(voice_client):
     voice_client.play(audio_source, after=lambda e: reschedule_play(e, voice_client))
 
 
-@bot.event
 async def on_ready():
     print(f'{bot.user.name} is connected to Discord!')
 
 
-@bot.command(name='play')
 async def play_music(ctx, *, url):
     global current_queue, currently_playing
     voice_client = ctx.voice_client
@@ -82,7 +76,6 @@ async def play_music(ctx, *, url):
         print("Started playing music")
 
 
-@bot.command(name='queue')
 async def show_queue(ctx):
     global current_queue, currently_playing
     if not current_queue:
@@ -95,8 +88,6 @@ async def show_queue(ctx):
         await ctx.send(f"File d'attente des chansons:\n{queue_message}")
 
 
-
-@bot.command(name='pause')
 async def pause_music(ctx):
     voice_client = ctx.voice_client
     if voice_client is not None and voice_client.is_playing():
@@ -104,7 +95,6 @@ async def pause_music(ctx):
         print("Music paused")
 
 
-@bot.command(name='resume')
 async def resume_music(ctx):
     voice_client = ctx.voice_client
     if voice_client is not None and voice_client.is_paused():
@@ -112,7 +102,6 @@ async def resume_music(ctx):
         print("Music resumed")
 
 
-@bot.command(name='skip')
 async def skip_music(ctx):
     global currently_playing, current_queue
     voice_client = ctx.voice_client
@@ -122,8 +111,6 @@ async def skip_music(ctx):
         await ctx.send("Aucune musique n'est actuellement en cours de lecture.")
 
 
-
-@bot.command(name='stop')
 async def stop_music(ctx):
     global currently_playing, current_queue
     voice_client = ctx.voice_client
@@ -137,7 +124,6 @@ async def stop_music(ctx):
         await ctx.send("Le bot a quitté le canal vocal.")
 
 
-@bot.command(name='leave')
 async def leave_channel(ctx):
     voice_client = ctx.voice_client
     if voice_client is not None:
