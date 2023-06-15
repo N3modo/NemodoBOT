@@ -12,16 +12,8 @@ def is_mod(ctx):
 
 
 async def clear(ctx):
-    message_count = len([msg async for msg in ctx.channel.history()])
-    if message_count == 0:
-        clear_message = await ctx.send('The channel is already empty!')
-        await asyncio.sleep(3)  # wait for 3 seconds
-        await clear_message.delete()
-    else:
-        await ctx.channel.purge()
-        empty_message = await ctx.send('The channel is now empty!')
-        await asyncio.sleep(3)  # wait for 3 seconds
-        await empty_message.delete()
+    print("channel cleared")
+    await ctx.channel.purge()
 
 
 async def command_prefix(this_bot: commands.Bot, message: discord.Message) -> str:
