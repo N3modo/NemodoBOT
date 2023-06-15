@@ -118,15 +118,6 @@ async def skip_music(ctx):
     voice_client = ctx.voice_client
     if voice_client is not None and voice_client.is_playing():
         voice_client.stop()
-        if currently_playing < len(current_queue):
-            currently_playing += 1
-            if not voice_client.is_playing():
-                schedule_play(voice_client)
-            await ctx.send("Musique actuelle passée. Lecture de la musique suivante si disponible.")
-        else:
-            current_queue.clear()
-            currently_playing = 0
-            await ctx.send("Plus de musique à passer.")
     else:
         await ctx.send("Aucune musique n'est actuellement en cours de lecture.")
 
