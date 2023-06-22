@@ -44,10 +44,6 @@ def schedule_play(voice_client):
     voice_client.play(audio_source, after=lambda e: reschedule_play(e, voice_client))
 
 
-async def on_ready():
-    print(f'{bot.user.name} is connected to Discord!')
-
-
 async def play_music(ctx, *, url):
     global current_queue, currently_playing
     voice_client = ctx.voice_client

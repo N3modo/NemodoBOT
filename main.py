@@ -18,6 +18,7 @@ async def on_error(event, *args, **kwargs):
 if __name__ == "__main__":
     intents = discord.Intents().all()
     bot = commands.Bot(command_prefix=command_vrac.command_prefix, intents=intents)
+
     # Add commands from command_vrac module
     bot.command(name='clear')(command_vrac.clear)
     bot.command(name='change_prefix')(command_vrac.change_prefix)
