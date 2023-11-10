@@ -1,2 +1,2 @@
-# YggBOT
+# NemodoBOT
 personal bot for discord
